@@ -28,7 +28,19 @@ const Project = defineDocumentType(() => ({
   }
 }))
 
+const Page = defineDocumentType(() => ({
+  name: 'Page',
+  filePathPattern: `pages/**/*.mdx`,
+  contentType: 'mdx',
+  fields: {
+    title: { type: 'string', required: true }
+  },
+  computedFields: {
+    slug: { type: 'string', resolve: (doc) => doc._raw.sourceFileName.replace(/\.mdx$/, '') }
+  }
+}))
+
 export default makeSource({
   contentDirPath: 'content',
-  documentTypes: [Post, Project]
+  documentTypes: [Post, Project, Page]
 })
