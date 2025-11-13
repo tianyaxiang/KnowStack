@@ -1,25 +1,35 @@
 {
   "name": "contentlayer-nextjs-github-admin-template",
   "version": "1.0.0",
+  "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
-    "start": "next start"
+    "build": "contentlayer build && next build",
+    "start": "next start",
+    "lint": "next lint",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "next": "latest",
-    "react": "latest",
-    "react-dom": "latest",
-    "contentlayer": "latest",
-    "next-contentlayer": "latest",
-    "@octokit/rest": "latest",
-    "next-auth": "latest",
-    "@uiw/react-md-editor": "latest",
-    "gray-matter": "latest"
+    "next": "^16.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "contentlayer": "^0.3.4",
+    "next-contentlayer": "^0.3.4",
+    "@octokit/rest": "^20.1.0",
+    "better-auth": "^1.0.0",
+    "@uiw/react-md-editor": "^4.0.0",
+    "gray-matter": "^4.0.3"
   },
   "devDependencies": {
-    "typescript": "latest",
-    "@types/react": "latest",
-    "@types/node": "latest"
+    "typescript": "^5.5.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@types/node": "^20.14.0",
+    "eslint": "^8.57.0",
+    "eslint-config-next": "^16.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
   }
 }

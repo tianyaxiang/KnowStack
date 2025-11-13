@@ -1,4 +1,4 @@
-import { signIn, signOut, useSession } from 'next-auth/react'
+import { signIn, signOut, useSession } from '@/lib/auth-client'
 import { listFiles } from '@/lib/github'
 import Link from 'next/link'
 import React from 'react'
@@ -14,7 +14,7 @@ export default function Admin() {
   }, [session])
 
   if (!session) {
-    return <button onClick={() => signIn('github')}>GitHub 登录</button>
+    return <button onClick={() => signIn.social({ provider: 'github' })}>GitHub 登录</button>
   }
 
   return (
