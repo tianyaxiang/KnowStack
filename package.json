@@ -1,0 +1,25 @@
+{
+  "name": "contentlayer-nextjs-github-admin-template",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "next": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "contentlayer": "latest",
+    "next-contentlayer": "latest",
+    "@octokit/rest": "latest",
+    "next-auth": "latest",
+    "@uiw/react-md-editor": "latest",
+    "gray-matter": "latest"
+  },
+  "devDependencies": {
+    "typescript": "latest",
+    "@types/react": "latest",
+    "@types/node": "latest"
+  }
+}
