@@ -2,9 +2,9 @@ import { Octokit } from '@octokit/rest'
 
 const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN })
 
-const OWNER = 'yourname'
-const REPO = 'your-repo'
-const BRANCH = 'main'
+const OWNER = process.env.GITHUB_OWNER || 'yourname'
+const REPO = process.env.GITHUB_REPO || 'your-repo'
+const BRANCH = process.env.GITHUB_BRANCH || 'main'
 
 export async function listFiles(path: string) {
   const res = await octokit.rest.repos.getContent({ owner: OWNER, repo: REPO, path })

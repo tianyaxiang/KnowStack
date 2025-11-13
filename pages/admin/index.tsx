@@ -12,11 +12,16 @@ export default function Admin() {
 
   React.useEffect(() => {
     if (session) {
-      listFiles('content/posts').then((data) => {
-        if (Array.isArray(data)) {
-          setFiles(data)
-        }
-      })
+      listFiles('content/posts')
+        .then((data) => {
+          if (Array.isArray(data)) {
+            setFiles(data)
+          }
+        })
+        .catch((error) => {
+          console.error('Failed to load files:', error)
+          setFiles([])
+        })
     }
   }, [session])
 
