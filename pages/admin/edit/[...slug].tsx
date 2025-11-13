@@ -2,6 +2,9 @@ import dynamic from 'next/dynamic'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import { getFile, updateFile } from '@/lib/github'
+import { Layout } from '@/components/layout'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 const MDEditor = dynamic(() => import('@uiw/react-md-editor'), { ssr: false })
 
@@ -10,10 +13,11 @@ export default function EditPage() {
   const [content, setContent] = useState('')
   const [sha, setSha] = useState('')
 
-  const path = `content/${router.query.slug?.join('/')}.mdx`
+  const slugArray = Array.isArray(router.query.slug) ? router.query.slug : []
+  const path = `content/${slugArray.join('/')}.mdx`
 
   useEffect(() => {
-    if (router.isReady) {
+    if (router.isReady && slugArray.length > 0) {
       getFile(path).then((res) => {
         if (res) {
           setContent(res.content)
@@ -21,7 +25,7 @@ export default function EditPage() {
         }
       })
     }
-  }, [router.isReady])
+  }, [router.isReady, path])
 
   async function handleSave() {
     await updateFile(path, content, sha)
@@ -29,12 +33,25 @@ export default function EditPage() {
   }
 
   return (
-    <div className="p-4">
-      <h1 className="text-lg mb-4">{path}</h1>
-      <MDEditor value={content} onChange={(v) => setContent(v || '')} height={500} />
-      <button onClick={handleSave} className="mt-4 px-4 py-2 bg-blue-600 text-white rounded">
-        保存
-      </button>
-    </div>
+    <Layout>
+      <div className="max-w-6xl mx-auto">
+        <Card>
+          <CardHeader>
+            <CardTitle>{path}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div data-color-mode="light" className="dark:hidden">
+              <MDEditor value={content} onChange={(v) => setContent(v || '')} height={500} />
+            </div>
+            <div data-color-mode="dark" className="hidden dark:block">
+              <MDEditor value={content} onChange={(v) => setContent(v || '')} height={500} />
+            </div>
+            <Button onClick={handleSave} className="mt-4">
+              保存到 GitHub
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    </Layout>
   )
 }

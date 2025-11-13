@@ -10,23 +10,32 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@octokit/rest": "^20.1.0",
+    "@uiw/react-md-editor": "^4.0.0",
+    "better-auth": "^1.0.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "contentlayer": "^0.3.4",
+    "gray-matter": "^4.0.3",
+    "lucide-react": "^0.553.0",
     "next": "^16.0.0",
+    "next-contentlayer": "^0.3.4",
+    "next-themes": "^0.4.6",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "contentlayer": "^0.3.4",
-    "next-contentlayer": "^0.3.4",
-    "@octokit/rest": "^20.1.0",
-    "better-auth": "^1.0.0",
-    "@uiw/react-md-editor": "^4.0.0",
-    "gray-matter": "^4.0.3"
+    "tailwind-merge": "^3.4.0"
   },
   "devDependencies": {
-    "typescript": "^5.5.0",
+    "@tailwindcss/typography": "^0.5.19",
+    "@types/node": "^20.14.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
-    "@types/node": "^20.14.0",
+    "autoprefixer": "^10.4.22",
     "eslint": "^8.57.0",
-    "eslint-config-next": "^16.0.0"
+    "eslint-config-next": "^16.0.0",
+    "postcss": "^8.5.6",
+    "tailwindcss": "3",
+    "typescript": "^5.5.0"
   },
   "engines": {
     "node": ">=18.0.0",
