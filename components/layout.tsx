@@ -14,6 +14,7 @@ export function Layout({ children }: LayoutProps) {
           <ThemeToggle />
           <nav className="ml-auto text-sm font-medium space-x-6">
             <Link href="/">Home</Link>
+            <Link href="/projects">Projects</Link>
             <Link href="/about">About</Link>
           </nav>
         </div>
