@@ -12,7 +12,7 @@ export default function Admin() {
 
   React.useEffect(() => {
     if (session) {
-      listFiles('content/blog').then((data) => {
+      listFiles('content/posts').then((data) => {
         if (Array.isArray(data)) {
           setFiles(data)
         }
@@ -66,7 +66,7 @@ export default function Admin() {
                 files.map((f) => (
                   <Link
                     key={f.name}
-                    href={`/admin/edit/blog/${f.name.replace('.mdx', '')}`}
+                    href={`/admin/edit/posts/${f.name.replace('.mdx', '')}`}
                     className="block p-3 rounded-md hover:bg-accent transition-colors"
                   >
                     {f.name}
