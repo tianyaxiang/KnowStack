@@ -1,17 +1,21 @@
 import { Octokit } from '@octokit/rest'
 
-const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN })
-
 const OWNER = process.env.GITHUB_OWNER || 'yourname'
 const REPO = process.env.GITHUB_REPO || 'your-repo'
 const BRANCH = process.env.GITHUB_BRANCH || 'main'
 
-export async function listFiles(path: string) {
+function getOctokit(token: string) {
+  return new Octokit({ auth: token })
+}
+
+export async function listFiles(path: string, token: string) {
+  const octokit = getOctokit(token)
   const res = await octokit.rest.repos.getContent({ owner: OWNER, repo: REPO, path })
   return res.data
 }
 
-export async function getFile(path: string) {
+export async function getFile(path: string, token: string) {
+  const octokit = getOctokit(token)
   const res = await octokit.rest.repos.getContent({ owner: OWNER, repo: REPO, path })
   if ('content' in res.data) {
     const content = Buffer.from(res.data.content, 'base64').toString('utf8')
@@ -20,7 +24,8 @@ export async function getFile(path: string) {
   return null
 }
 
-export async function updateFile(path: string, content: string, sha: string) {
+export async function updateFile(path: string, content: string, sha: string, token: string) {
+  const octokit = getOctokit(token)
   await octokit.rest.repos.createOrUpdateFileContents({
     owner: OWNER,
     repo: REPO,
