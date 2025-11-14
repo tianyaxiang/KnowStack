@@ -1,6 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { createSessionJWT } from '@/lib/auth'
 
+export const runtime = 'edge'
+
 // GitHub OAuth 回调 - 获取 access token 并创建 session
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { code } = req.query

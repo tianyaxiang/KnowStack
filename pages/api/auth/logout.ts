@@ -1,5 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 
+export const runtime = 'edge'
+
 // 登出 - 清除 session cookie
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   res.setHeader(

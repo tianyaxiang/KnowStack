@@ -2,6 +2,8 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import { listFiles } from '@/lib/github'
 import { getSessionFromRequest, getGithubTokenFromRequest } from '@/lib/auth'
 
+export const runtime = 'edge'
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     // 验证用户 session

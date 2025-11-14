@@ -1,5 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 
+export const runtime = 'edge'
+
 // GitHub OAuth 登录 - 重定向到 GitHub
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const clientId = process.env.GITHUB_CLIENT_ID

@@ -1,6 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { getSessionFromRequest } from '@/lib/auth'
 
+export const runtime = 'edge'
+
 // 获取当前 session
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const session = await getSessionFromRequest(req)
