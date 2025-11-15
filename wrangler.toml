@@ -5,3 +5,12 @@ pages_build_output_dir = ".vercel/output/static"
 
 [env.production]
 name = "knowstack"
+## GitHub OAuth (for Better Auth login)
+GITHUB_CLIENT_ID= "Ov23liTYKK7AK5L1Y1ld"
+# JWT Secret (for encrypting GitHub tokens)
+JWT_SECRET="4e3460cd94d671d42e300efcfa5f845d9d56b4e3"
+
+# GitHub API (for content management)
+GITHUB_OWNER="tianyaxiang"
+GITHUB_REPO="knowstack"
+GITHUB_BRANCH="main"
