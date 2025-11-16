@@ -1,18 +1,18 @@
-import type { NextApiRequest, NextApiResponse } from 'next'
+import type { NextRequest } from 'next/server'
+import { NextResponse } from 'next/server'
 import { getSessionFromRequest } from '@/lib/auth'
 
 export const runtime = 'edge'
 
 // 获取当前 session
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(req: NextRequest) {
   const session = await getSessionFromRequest(req)
-  
+
   if (!session) {
-    return res.status(401).json({ error: 'Not authenticated' })
+    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
   }
 
-  // 不返回 githubToken 给前端
-  res.status(200).json({
+  return NextResponse.json({
     user: session.user,
   })
 }

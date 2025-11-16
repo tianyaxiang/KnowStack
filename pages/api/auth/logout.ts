@@ -1,13 +1,18 @@
-import type { NextApiRequest, NextApiResponse } from 'next'
+import type { NextRequest } from 'next/server'
+import { NextResponse } from 'next/server'
 
 export const runtime = 'edge'
 
 // 登出 - 清除 session cookie
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  res.setHeader(
-    'Set-Cookie',
-    `auth_session=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0`
-  )
-  
-  res.status(200).json({ success: true })
+export default async function handler(req: NextRequest) {
+  const response = NextResponse.json({ success: true })
+  response.cookies.set({
+    name: 'auth_session',
+    value: '',
+    path: '/',
+    httpOnly: true,
+    sameSite: 'lax',
+    maxAge: 0,
+  })
+  return response
 }

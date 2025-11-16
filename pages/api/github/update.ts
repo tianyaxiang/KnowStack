@@ -1,35 +1,37 @@
-import type { NextApiRequest, NextApiResponse } from 'next'
+import type { NextRequest } from 'next/server'
+import { NextResponse } from 'next/server'
 import { updateFile } from '@/lib/github'
 import { getSessionFromRequest, getGithubTokenFromRequest } from '@/lib/auth'
 
 export const runtime = 'edge'
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(req: NextRequest) {
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' })
+    return NextResponse.json({ error: 'Method not allowed' }, { status: 405 })
   }
 
   try {
-    // 验证用户 session
     const session = await getSessionFromRequest(req)
-    
     if (!session) {
-      return res.status(401).json({ error: 'Not authenticated' })
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
     }
 
-    // 从 JWT 中获取 GitHub token
     const token = await getGithubTokenFromRequest(req)
-    
     if (!token) {
-      return res.status(400).json({ error: 'GitHub token not found. Please login again.' })
+      return NextResponse.json({ error: 'GitHub token not found. Please login again.' }, { status: 400 })
     }
 
-    const { path, content, sha } = req.body
+    const body = await req.json()
+    const { path, content, sha } = body
+
+    if (!path || typeof path !== 'string') {
+      return NextResponse.json({ error: 'Missing path' }, { status: 400 })
+    }
 
     await updateFile(path, content, sha, token)
-    res.status(200).json({ success: true })
+    return NextResponse.json({ success: true })
   } catch (error: any) {
     console.error('API /update - Error:', error)
-    res.status(error.status || 500).json({ error: error.message })
+    return NextResponse.json({ error: error.message }, { status: error?.status || 500 })
   }
 }
