@@ -1,11 +1,17 @@
-import React from 'react'
+'use client'
+
+import * as React from 'react'
 import Link from 'next/link'
 import { AdminLayout } from '@/components/admin-layout'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { cn } from '@/lib/utils'
 
-type RepoFile = {
+interface RepoFile {
   name: string
   path?: string
   sha?: string
@@ -13,7 +19,7 @@ type RepoFile = {
 
 type FilterType = 'all' | 'published' | 'draft'
 
-export default function Admin() {
+export default function AdminPage() {
   const [session, setSession] = React.useState<any>(null)
   const [sessionLoading, setSessionLoading] = React.useState(true)
   const [files, setFiles] = React.useState<RepoFile[]>([])
@@ -27,27 +33,12 @@ export default function Admin() {
     let mounted = true
     fetch('/api/auth/session')
       .then((res) => {
-        if (res.ok) {
-          return res.json()
-        }
+        if (res.ok) return res.json()
         throw new Error('Not authenticated')
       })
-      .then((data) => {
-        if (mounted) {
-          setSession(data)
-        }
-      })
-      .catch(() => {
-        if (mounted) {
-          setSession(null)
-        }
-      })
-      .finally(() => {
-        if (mounted) {
-          setSessionLoading(false)
-        }
-      })
-
+      .then((data) => mounted && setSession(data))
+      .catch(() => mounted && setSession(null))
+      .finally(() => mounted && setSessionLoading(false))
     return () => {
       mounted = false
     }
@@ -63,11 +54,8 @@ export default function Admin() {
         throw new Error(body.error || `HTTP error! status: ${res.status}`)
       }
       const data = await res.json()
-      if (Array.isArray(data)) {
-        setFiles(data)
-      } else {
-        throw new Error('GitHub API 返回了非数组结构')
-      }
+      if (!Array.isArray(data)) throw new Error('GitHub API 返回了非数组结构')
+      setFiles(data)
     } catch (err) {
       console.error('Failed to load files:', err)
       setFiles([])
@@ -100,6 +88,7 @@ export default function Admin() {
 
   const drafts = React.useMemo(() => files.filter((file) => /draft/i.test(file.name)).length, [files])
   const published = Math.max(files.length - drafts, 0)
+
   const filteredFiles = React.useMemo(() => {
     return files.filter((file) => {
       const lowerName = file.name.toLowerCase()
@@ -112,29 +101,167 @@ export default function Admin() {
     })
   }, [files, filter, search])
 
-  const filterOptions: { label: string; value: FilterType }[] = [
-    { label: '全部', value: 'all' },
-    { label: '已发布', value: 'published' },
-    { label: '草稿', value: 'draft' },
-  ]
-
   const formatFileName = (name: string) => name.replace('.mdx', '').replace(/-/g, ' ')
   const greetingName = session?.user?.name || '创作者'
+
+  const DashboardCards = (
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">文章总数</CardTitle>
+          <span className="text-xs uppercase text-muted-foreground">总览</span>
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{files.length}</div>
+          <p className="text-xs text-muted-foreground">统计 content/posts 中的 MDX 文件</p>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">已发布</CardTitle>
+          <span className="text-xs uppercase text-muted-foreground">PUBLISHED</span>
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold text-emerald-500 dark:text-emerald-400">{published}</div>
+          <p className="text-xs text-muted-foreground">匹配非 draft 的文件</p>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">草稿</CardTitle>
+          <span className="text-xs uppercase text-muted-foreground">Draft</span>
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold text-amber-500">{drafts}</div>
+          <p className="text-xs text-muted-foreground">文件名包含 draft 的文章</p>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">存储目录</CardTitle>
+          <span className="text-xs uppercase text-muted-foreground">PATH</span>
+        </CardHeader>
+        <CardContent>
+          <div className="text-lg font-semibold">content/posts</div>
+          <p className="text-xs text-muted-foreground">通过 GitHub API 实时同步</p>
+        </CardContent>
+      </Card>
+    </div>
+  )
+
+  const filesTable = (
+    <Card>
+      <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <CardTitle>文章列表</CardTitle>
+          <CardDescription>参考 shadcn 的 Acme Inc demo 进行排版</CardDescription>
+        </div>
+        <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
+          <Tabs value={filter} onValueChange={(value) => setFilter(value as FilterType)} className="sm:w-auto">
+            <TabsList>
+              <TabsTrigger value="all">全部</TabsTrigger>
+              <TabsTrigger value="published">已发布</TabsTrigger>
+              <TabsTrigger value="draft">草稿</TabsTrigger>
+            </TabsList>
+          </Tabs>
+          <Input
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="搜索文件"
+            className="sm:w-56"
+          />
+        </div>
+      </CardHeader>
+      <CardContent>
+        {loading ? (
+          <div className="space-y-3">
+            {Array.from({ length: 5 }).map((_, index) => (
+              <Skeleton key={index} className="h-12 w-full" />
+            ))}
+          </div>
+        ) : error ? (
+          <div className="rounded-2xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
+            <p className="font-semibold">加载失败</p>
+            <p className="mt-1 text-destructive/80">{error}</p>
+          </div>
+        ) : filteredFiles.length === 0 ? (
+          <div className="rounded-2xl border border-dashed p-10 text-center text-sm text-muted-foreground">
+            {files.length === 0
+              ? '暂无文章，请在 content/posts 中添加 MDX 文件。'
+              : '没有找到匹配的文件，试试调整搜索或筛选条件。'}
+          </div>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[40%]">文件名</TableHead>
+                <TableHead className="w-[15%]">状态</TableHead>
+                <TableHead>路径</TableHead>
+                <TableHead className="text-right">操作</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredFiles.map((file) => {
+                const isDraft = /draft/i.test(file.name)
+                const slug = file.name.replace('.mdx', '')
+                const statusStyles = isDraft
+                  ? 'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-200'
+                  : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-200'
+                return (
+                  <TableRow key={file.name}>
+                    <TableCell className="font-medium capitalize">{formatFileName(file.name)}</TableCell>
+                    <TableCell>
+                      <span className={cn('rounded-full px-3 py-1 text-xs font-semibold', statusStyles)}>
+                        {isDraft ? '草稿' : '已发布'}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-xs text-muted-foreground">
+                      {file.path || `content/posts/${file.name}`}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Link
+                        href={`/admin/edit/posts/${slug}`}
+                        className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'rounded-full')}
+                      >
+                        编辑
+                      </Link>
+                    </TableCell>
+                  </TableRow>
+                )
+              })}
+            </TableBody>
+          </Table>
+        )}
+      </CardContent>
+    </Card>
+  )
+
+  const quickActions = (
+    <Card className="lg:col-span-2">
+      <CardHeader>
+        <CardTitle>快捷操作</CardTitle>
+        <CardDescription>模仿 Acme Inc demo 的操作块，快速执行常见动作。</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="flex flex-wrap gap-3">
+          <Button onClick={handleRefresh} disabled={loading || refreshing}>
+            {refreshing ? '刷新中...' : '刷新列表'}
+          </Button>
+          <Button variant="secondary" onClick={handleLogout}>
+            退出登录
+          </Button>
+          <Link href="/" className={cn(buttonVariants({ variant: 'ghost' }))}>
+            查看前台
+          </Link>
+        </div>
+      </CardContent>
+    </Card>
+  )
 
   if (sessionLoading) {
     return (
       <AdminLayout>
-        <div className="max-w-3xl mx-auto py-24">
-          <Card className="border-dashed">
-            <CardHeader>
-              <CardTitle>正在加载管理后台</CardTitle>
-              <CardDescription>检查会话信息...</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-16 w-full animate-pulse rounded-2xl bg-muted" />
-            </CardContent>
-          </Card>
-        </div>
+        <Skeleton className="h-32 w-full" />
       </AdminLayout>
     )
   }
@@ -142,22 +269,14 @@ export default function Admin() {
   if (!session) {
     return (
       <AdminLayout>
-        <div className="max-w-2xl mx-auto py-24">
-          <Card className="overflow-hidden border-primary/30 bg-gradient-to-br from-primary/15 to-background">
+        <div className="flex min-h-[60vh] items-center justify-center">
+          <Card className="w-full max-w-md">
             <CardHeader>
-              <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Admin Console</p>
-              <CardTitle className="text-3xl">登录后台</CardTitle>
-              <CardDescription>
-                连接 GitHub 账号即可在浏览器内编辑 MDX 文章、管理项目介绍并发布到远端仓库。
-              </CardDescription>
+              <CardTitle>登录后台</CardTitle>
+              <CardDescription>使用 GitHub 授权访问内容管理。</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>· 使用 Better Auth session + JWT 确保 token 安全</li>
-                <li>· 支持暗黑模式的所见即所得编辑体验</li>
-                <li>· 一键推送内容到 GitHub 主分支</li>
-              </ul>
-              <Button onClick={handleLogin} className="w-full h-12 text-base font-semibold">
+            <CardContent>
+              <Button onClick={handleLogin} className="w-full">
                 使用 GitHub 登录
               </Button>
             </CardContent>
@@ -169,155 +288,19 @@ export default function Admin() {
 
   return (
     <AdminLayout>
-      <div className="space-y-8 py-4">
-        <section className="overflow-hidden rounded-3xl border bg-gradient-to-r from-primary/20 via-primary/10 to-background p-8 shadow-lg">
-          <div className="space-y-4">
-            <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground/80">Admin · Sage Garden</p>
-            <h1 className="text-3xl font-semibold text-foreground sm:text-4xl">
-              你好，{greetingName}
-            </h1>
-            <p className="max-w-2xl text-base text-muted-foreground">
-              在这里管理文章、刷新内容和维护项目展示区。每次调整都会通过 Contentlayer + GitHub 工作流即时同步至前台。
-            </p>
-            <div className="flex flex-wrap gap-3">
-              <Button onClick={handleRefresh} disabled={loading || refreshing}>
-                {refreshing ? '刷新中...' : '刷新文章列表'}
-              </Button>
-              <Button variant="secondary" onClick={handleLogout}>
-                退出登录
-              </Button>
-              <Link
-                href="/"
-                className={cn(buttonVariants({ variant: 'ghost' }), 'border border-transparent hover:border-border/50')}
-              >
-                查看前台站点
-              </Link>
-            </div>
-          </div>
-        </section>
-
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Card className="bg-card/60">
-            <CardHeader>
-              <CardDescription>文章总数</CardDescription>
-              <CardTitle className="text-4xl font-semibold">{files.length}</CardTitle>
-            </CardHeader>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardDescription>已发布</CardDescription>
-              <CardTitle className="text-4xl font-semibold text-emerald-500 dark:text-emerald-400">
-                {published}
-              </CardTitle>
-            </CardHeader>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardDescription>草稿</CardDescription>
-              <CardTitle className="text-4xl font-semibold text-amber-500">{drafts}</CardTitle>
-            </CardHeader>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardDescription>内容目录</CardDescription>
-              <CardTitle className="text-lg font-medium text-muted-foreground">
-                content/posts
-              </CardTitle>
-            </CardHeader>
-          </Card>
+      <div className="space-y-6">
+        <div className="flex flex-col gap-2">
+          <p className="text-sm text-muted-foreground">您好 {greetingName}, 欢迎来到 Acme 风格后台</p>
+          <h1 className="text-3xl font-semibold tracking-tight">内容概览</h1>
+          <p className="text-muted-foreground">
+            引用 shadcn 提供的 Acme Inc Dashboard 布局，将统计、快捷操作与文章列表整合在统一视图中。
+          </p>
         </div>
-
-        <Card className="border-primary/20">
-          <CardHeader className="space-y-6">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <CardTitle className="text-2xl">文章列表</CardTitle>
-                <CardDescription>筛选、搜索并跳转到编辑器</CardDescription>
-              </div>
-              <input
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                placeholder="搜索文件，例如 hello-world"
-                className="w-full rounded-2xl border border-border/60 bg-background px-4 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:w-60"
-              />
-            </div>
-            <div className="flex flex-wrap gap-3">
-              {filterOptions.map((option) => (
-                <button
-                  key={option.value}
-                  onClick={() => setFilter(option.value)}
-                  className={cn(
-                    'rounded-full border px-4 py-1.5 text-sm transition-colors',
-                    filter === option.value
-                      ? 'border-primary/60 bg-primary/10 text-primary'
-                      : 'border-border/70 text-muted-foreground hover:text-foreground'
-                  )}
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <div className="space-y-3">
-                {Array.from({ length: 4 }).map((_, index) => (
-                  <div key={index} className="h-14 animate-pulse rounded-2xl bg-muted/60" />
-                ))}
-              </div>
-            ) : error ? (
-              <div className="rounded-2xl border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive">
-                <p className="font-semibold">加载失败</p>
-                <p className="mt-1 text-destructive/80">{error}</p>
-                <p className="mt-2 text-muted-foreground">
-                  请确认 GitHub OAuth、仓库权限以及 Contentlayer 配置是否正确。
-                </p>
-              </div>
-            ) : filteredFiles.length === 0 ? (
-              <div className="rounded-2xl border border-dashed p-10 text-center text-sm text-muted-foreground">
-                {files.length === 0
-                  ? '暂无文章，请在 content/posts 中添加 MDX 文件。'
-                  : '没有找到匹配的文件，试试调整搜索或筛选条件。'}
-              </div>
-            ) : (
-              <div className="divide-y divide-border/60">
-                {filteredFiles.map((file) => {
-                  const isDraft = /draft/i.test(file.name)
-                  const statusStyles = isDraft
-                    ? 'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-200'
-                    : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-200'
-                  return (
-                    <div
-                      key={file.name}
-                      className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:gap-6"
-                    >
-                      <div className="flex-1">
-                        <p className="text-base font-medium capitalize">{formatFileName(file.name)}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {file.path || `content/posts/${file.name}`}
-                        </p>
-                      </div>
-                      <div className="flex flex-wrap items-center gap-3">
-                        <span className={cn('rounded-full px-3 py-1 text-xs font-semibold', statusStyles)}>
-                          {isDraft ? '草稿' : '已发布'}
-                        </span>
-                        <Link
-                          href={`/admin/edit/posts/${file.name.replace('.mdx', '')}`}
-                          className={cn(
-                            buttonVariants({ variant: 'outline', size: 'sm' }),
-                            'rounded-full'
-                          )}
-                        >
-                          编辑
-                        </Link>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        {DashboardCards}
+        <div className="grid gap-6 lg:grid-cols-3">
+          {filesTable}
+          {quickActions}
+        </div>
       </div>
     </AdminLayout>
   )
