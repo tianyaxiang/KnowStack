@@ -116,7 +116,7 @@ export default function AdminProjectsPage() {
   )
 
   const filesTable = (
-    <Card>
+    <Card className="border-[var(--sidebar-border)] bg-background/95">
       <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <CardTitle>项目管理</CardTitle>
@@ -219,21 +219,36 @@ export default function AdminProjectsPage() {
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <div className="flex flex-col gap-2">
-          <p className="text-sm text-muted-foreground">您好 {greetingName}，欢迎管理项目</p>
-          <h1 className="text-3xl font-semibold tracking-tight">项目管理</h1>
-          <p className="text-muted-foreground">
-            管理 content/projects 目录中的文件，支持草稿/已发布过滤与搜索。
-          </p>
-        </div>
+        <Card className="border-border/70 bg-[var(--accent)]/10 shadow-sm">
+          <CardHeader className="space-y-2">
+            <CardDescription className="text-xs uppercase tracking-[0.35em] text-muted-foreground">
+              Sage Garden Theme
+            </CardDescription>
+            <CardTitle className="text-3xl">项目管理</CardTitle>
+            <p className="text-muted-foreground">
+              项目列表使用 Sage Garden 配色，指标卡片与按钮风格与后台保持一致。
+            </p>
+            <div className="flex flex-wrap gap-3 pt-1">
+              <Button onClick={loadFiles} disabled={loading}>
+                {loading ? '加载中...' : '刷新列表'}
+              </Button>
+              <Button variant="secondary" onClick={handleLogout}>
+                退出登录
+              </Button>
+              <Link href="/" className={cn(buttonVariants({ variant: 'ghost' }))}>
+                查看前台
+              </Link>
+            </div>
+          </CardHeader>
+        </Card>
         <div className="grid gap-4 sm:grid-cols-3">
-          <Card>
+          <Card className="border-[var(--sidebar-border)] bg-[var(--sidebar)]/30">
             <CardHeader className="pb-2">
               <CardDescription>项目总数</CardDescription>
               <CardTitle className="text-2xl">{files.length}</CardTitle>
             </CardHeader>
           </Card>
-          <Card>
+          <Card className="border-[var(--sidebar-border)] bg-[var(--sidebar)]/30">
             <CardHeader className="pb-2">
               <CardDescription>已发布</CardDescription>
               <CardTitle className="text-2xl text-emerald-500 dark:text-emerald-400">
@@ -241,7 +256,7 @@ export default function AdminProjectsPage() {
               </CardTitle>
             </CardHeader>
           </Card>
-          <Card>
+          <Card className="border-[var(--sidebar-border)] bg-[var(--sidebar)]/30">
             <CardHeader className="pb-2">
               <CardDescription>草稿</CardDescription>
               <CardTitle className="text-2xl text-amber-500">

@@ -122,7 +122,7 @@ export function AdminLayout({ children, className, onLogout }: AdminLayoutProps)
           </div>
         </aside>
         <div className="flex flex-col bg-background">
-          <header className="flex h-16 items-center gap-3 border-b border-border/60 bg-background/95 px-4 shadow-sm backdrop-blur lg:px-6">
+          <header className="flex h-16 items-center gap-3 border-b border-[var(--sidebar-border)]/70 bg-[var(--sidebar)]/15 px-4 shadow-sm backdrop-blur lg:px-6">
             <Sheet>
               <SheetTrigger asChild>
                 <Button variant="outline" size="icon" className="lg:hidden">
@@ -204,7 +204,14 @@ export function AdminLayout({ children, className, onLogout }: AdminLayoutProps)
               </DropdownMenu>
             </div>
           </header>
-          <main className={cn('flex-1 overflow-y-auto bg-background p-4 lg:p-6', className)}>{children}</main>
+          <main
+            className={cn(
+              'flex-1 overflow-y-auto border-t border-[var(--sidebar-border)]/60 bg-[var(--sidebar)]/10 p-4 lg:p-6',
+              className
+            )}
+          >
+            {children}
+          </main>
         </div>
       </div>
     </div>

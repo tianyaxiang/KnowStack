@@ -237,7 +237,7 @@ export default function AdminPage() {
   )
 
   const quickActions = (
-    <Card className="lg:col-span-2">
+    <Card className="lg:col-span-2 border-[var(--sidebar-border)] bg-[var(--sidebar)]/20">
       <CardHeader>
         <CardTitle>快捷操作</CardTitle>
         <CardDescription>模仿 Acme Inc demo 的操作块，快速执行常见动作。</CardDescription>
@@ -289,7 +289,7 @@ export default function AdminPage() {
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <Card className="border-border/70 bg-[var(--accent)]/10 shadow-sm">
+        <Card className="border-[var(--sidebar-border)] bg-[var(--sidebar)]/20 shadow-sm">
           <CardHeader className="space-y-2">
             <CardDescription className="text-xs uppercase tracking-[0.35em] text-muted-foreground">
               Sage Garden Theme
@@ -311,7 +311,9 @@ export default function AdminPage() {
             </div>
           </CardHeader>
         </Card>
-        {DashboardCards}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {DashboardCards}
+        </div>
         <div className="grid gap-6 lg:grid-cols-3">
           {filesTable}
           {quickActions}
