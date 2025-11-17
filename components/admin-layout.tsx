@@ -12,6 +12,8 @@ import {
   LayoutGrid,
   LogOut,
   Menu,
+  PanelLeftClose,
+  PanelLeftOpen,
   PencilRuler,
   Search,
 } from 'lucide-react'
@@ -49,6 +51,7 @@ const navItems = [
 
 export function AdminLayout({ children, className, onLogout }: AdminLayoutProps) {
   const pathname = usePathname()
+  const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false)
 
   const NavLinks = ({ className: wrapperClass }: { className?: string }) => (
     <nav className={cn('grid gap-1', wrapperClass)}>
@@ -80,8 +83,18 @@ export function AdminLayout({ children, className, onLogout }: AdminLayoutProps)
 
   return (
     <div className="theme min-h-screen bg-background font-[var(--font-sans)] text-foreground">
-      <div className="grid min-h-screen lg:grid-cols-[280px_1fr]">
-        <aside className="hidden border-r border-[var(--sidebar-border)] bg-[var(--sidebar)] text-[var(--sidebar-foreground)] lg:sticky lg:top-0 lg:block lg:h-screen">
+      <div
+        className={cn(
+          'grid min-h-screen',
+          sidebarCollapsed ? 'lg:grid-cols-1' : 'lg:grid-cols-[280px_1fr]'
+        )}
+      >
+        <aside
+          className={cn(
+            'hidden border-r border-[var(--sidebar-border)] bg-[var(--sidebar)] text-[var(--sidebar-foreground)] lg:sticky lg:top-0 lg:block lg:h-screen',
+            sidebarCollapsed && 'lg:hidden'
+          )}
+        >
           <div className="flex h-full flex-col">
             <div className="flex h-16 items-center gap-2 border-b border-[var(--sidebar-border)] px-6">
               <Link href="/" className="flex items-center gap-2 font-semibold">
@@ -124,12 +137,29 @@ export function AdminLayout({ children, className, onLogout }: AdminLayoutProps)
         <div className="flex flex-col bg-background">
           <header className="flex h-16 items-center gap-3 border-b border-[var(--sidebar-border)]/70 bg-[var(--sidebar)]/15 px-4 shadow-sm backdrop-blur lg:px-6">
             <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="outline" size="icon" className="lg:hidden">
-                  <Menu className="h-5 w-5" />
-                  <span className="sr-only">打开侧边栏</span>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="hidden lg:inline-flex"
+                  onClick={() => setSidebarCollapsed((prev) => !prev)}
+                >
+                  {sidebarCollapsed ? (
+                    <PanelLeftOpen className="h-5 w-5" />
+                  ) : (
+                    <PanelLeftClose className="h-5 w-5" />
+                  )}
+                  <span className="sr-only">
+                    {sidebarCollapsed ? '展开侧边栏' : '折叠侧边栏'}
+                  </span>
                 </Button>
-              </SheetTrigger>
+                <SheetTrigger asChild>
+                  <Button variant="outline" size="icon" className="lg:hidden">
+                    <Menu className="h-5 w-5" />
+                    <span className="sr-only">打开侧边栏</span>
+                  </Button>
+                </SheetTrigger>
+              </div>
               <SheetContent side="left" className="w-72 bg-background">
                 <SheetHeader>
                   <SheetTitle>后台导航</SheetTitle>
