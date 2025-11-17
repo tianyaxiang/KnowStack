@@ -81,7 +81,7 @@ export function AdminLayout({ children, className, onLogout }: AdminLayoutProps)
   return (
     <div className="theme min-h-screen bg-background font-[var(--font-sans)] text-foreground">
       <div className="grid min-h-screen lg:grid-cols-[280px_1fr]">
-        <aside className="hidden border-r border-[var(--sidebar-border)] bg-[var(--sidebar)] text-[var(--sidebar-foreground)] lg:block">
+        <aside className="hidden border-r border-[var(--sidebar-border)] bg-[var(--sidebar)] text-[var(--sidebar-foreground)] lg:sticky lg:top-0 lg:block lg:h-screen">
           <div className="flex h-full flex-col">
             <div className="flex h-16 items-center gap-2 border-b border-[var(--sidebar-border)] px-6">
               <Link href="/" className="flex items-center gap-2 font-semibold">
