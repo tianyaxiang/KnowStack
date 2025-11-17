@@ -311,9 +311,7 @@ export default function AdminPage() {
             </div>
           </CardHeader>
         </Card>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {DashboardCards}
-        </div>
+{DashboardCards}
         <div className="grid gap-6 lg:grid-cols-3">
           {filesTable}
           {quickActions}
