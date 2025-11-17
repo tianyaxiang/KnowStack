@@ -8,10 +8,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { cn } from '@/lib/utils'
 
-interface RepoFile {
+type RepoFile = {
   name: string
   path?: string
   sha?: string
@@ -19,7 +19,10 @@ interface RepoFile {
 
 type FilterType = 'all' | 'published' | 'draft'
 
-export default function AdminPage() {
+const RESOURCE_PATH = 'content/projects'
+const EDIT_PREFIX = '/admin/edit/projects/'
+
+export default function AdminProjectsPage() {
   const [session, setSession] = React.useState<any>(null)
   const [sessionLoading, setSessionLoading] = React.useState(true)
   const [files, setFiles] = React.useState<RepoFile[]>([])
@@ -27,7 +30,6 @@ export default function AdminPage() {
   const [error, setError] = React.useState<string | null>(null)
   const [filter, setFilter] = React.useState<FilterType>('all')
   const [search, setSearch] = React.useState('')
-  const [refreshing, setRefreshing] = React.useState(false)
 
   React.useEffect(() => {
     let mounted = true
@@ -48,7 +50,7 @@ export default function AdminPage() {
     setLoading(true)
     setError(null)
     try {
-      const res = await fetch('/api/github/list?path=content/posts')
+      const res = await fetch(`/api/github/list?path=${RESOURCE_PATH}`)
       if (!res.ok) {
         const body = await res.json().catch(() => ({}))
         throw new Error(body.error || `HTTP error! status: ${res.status}`)
@@ -80,15 +82,6 @@ export default function AdminPage() {
     window.location.reload()
   }
 
-  const handleRefresh = async () => {
-    setRefreshing(true)
-    await loadFiles()
-    setRefreshing(false)
-  }
-
-  const drafts = React.useMemo(() => files.filter((file) => /draft/i.test(file.name)).length, [files])
-  const published = Math.max(files.length - drafts, 0)
-
   const filteredFiles = React.useMemo(() => {
     return files.filter((file) => {
       const lowerName = file.name.toLowerCase()
@@ -104,48 +97,21 @@ export default function AdminPage() {
   const formatFileName = (name: string) => name.replace('.mdx', '').replace(/-/g, ' ')
   const greetingName = session?.user?.name || '创作者'
 
-  const DashboardCards = (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">文章总数</CardTitle>
-          <span className="text-xs uppercase text-muted-foreground">总览</span>
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{files.length}</div>
-          <p className="text-xs text-muted-foreground">统计 content/posts 中的 MDX 文件</p>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">已发布</CardTitle>
-          <span className="text-xs uppercase text-muted-foreground">PUBLISHED</span>
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold text-emerald-500 dark:text-emerald-400">{published}</div>
-          <p className="text-xs text-muted-foreground">匹配非 draft 的文件</p>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">草稿</CardTitle>
-          <span className="text-xs uppercase text-muted-foreground">Draft</span>
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold text-amber-500">{drafts}</div>
-          <p className="text-xs text-muted-foreground">文件名包含 draft 的文章</p>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">存储目录</CardTitle>
-          <span className="text-xs uppercase text-muted-foreground">PATH</span>
-        </CardHeader>
-        <CardContent>
-          <div className="text-lg font-semibold">content/posts</div>
-          <p className="text-xs text-muted-foreground">通过 GitHub API 实时同步</p>
-        </CardContent>
-      </Card>
+  const filters = (
+    <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
+      <Tabs value={filter} onValueChange={(value) => setFilter(value as FilterType)} className="sm:w-auto">
+        <TabsList>
+          <TabsTrigger value="all">全部</TabsTrigger>
+          <TabsTrigger value="published">已发布</TabsTrigger>
+          <TabsTrigger value="draft">草稿</TabsTrigger>
+        </TabsList>
+      </Tabs>
+      <Input
+        value={search}
+        onChange={(event) => setSearch(event.target.value)}
+        placeholder="搜索项目"
+        className="sm:w-56"
+      />
     </div>
   )
 
@@ -153,24 +119,10 @@ export default function AdminPage() {
     <Card>
       <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <CardTitle>文章列表</CardTitle>
-          <CardDescription>参考 shadcn 的 Acme Inc demo 进行排版</CardDescription>
+          <CardTitle>项目管理</CardTitle>
+          <CardDescription>列出 content/projects 下的文件</CardDescription>
         </div>
-        <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
-          <Tabs value={filter} onValueChange={(value) => setFilter(value as FilterType)} className="sm:w-auto">
-            <TabsList>
-              <TabsTrigger value="all">全部</TabsTrigger>
-              <TabsTrigger value="published">已发布</TabsTrigger>
-              <TabsTrigger value="draft">草稿</TabsTrigger>
-            </TabsList>
-          </Tabs>
-          <Input
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder="搜索文件"
-            className="sm:w-56"
-          />
-        </div>
+        {filters}
       </CardHeader>
       <CardContent>
         {loading ? (
@@ -187,14 +139,14 @@ export default function AdminPage() {
         ) : filteredFiles.length === 0 ? (
           <div className="rounded-2xl border border-dashed p-10 text-center text-sm text-muted-foreground">
             {files.length === 0
-              ? '暂无文章，请在 content/posts 中添加 MDX 文件。'
-              : '没有找到匹配的文件，试试调整搜索或筛选条件。'}
+              ? `暂无项目，请在 ${RESOURCE_PATH} 中添加文件。`
+              : '没有找到匹配的项目，试试调整搜索或筛选条件。'}
           </div>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[40%]">文件名</TableHead>
+                <TableHead className="w-[40%]">项目</TableHead>
                 <TableHead className="w-[15%]">状态</TableHead>
                 <TableHead>路径</TableHead>
                 <TableHead className="text-right">操作</TableHead>
@@ -216,11 +168,11 @@ export default function AdminPage() {
                       </span>
                     </TableCell>
                     <TableCell className="text-xs text-muted-foreground">
-                      {file.path || `content/posts/${file.name}`}
+                      {file.path || `${RESOURCE_PATH}/${file.name}`}
                     </TableCell>
                     <TableCell className="text-right">
                       <Link
-                        href={`/admin/edit/posts/${slug}`}
+                        href={`${EDIT_PREFIX}${slug}`}
                         className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'rounded-full')}
                       >
                         编辑
@@ -232,28 +184,6 @@ export default function AdminPage() {
             </TableBody>
           </Table>
         )}
-      </CardContent>
-    </Card>
-  )
-
-  const quickActions = (
-    <Card className="lg:col-span-2">
-      <CardHeader>
-        <CardTitle>快捷操作</CardTitle>
-        <CardDescription>模仿 Acme Inc demo 的操作块，快速执行常见动作。</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="flex flex-wrap gap-3">
-          <Button onClick={handleRefresh} disabled={loading || refreshing}>
-            {refreshing ? '刷新中...' : '刷新列表'}
-          </Button>
-          <Button variant="secondary" onClick={handleLogout}>
-            退出登录
-          </Button>
-          <Link href="/" className={cn(buttonVariants({ variant: 'ghost' }))}>
-            查看前台
-          </Link>
-        </div>
       </CardContent>
     </Card>
   )
@@ -289,33 +219,38 @@ export default function AdminPage() {
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <Card className="border-border/70 bg-[var(--accent)]/10 shadow-sm">
-          <CardHeader className="space-y-2">
-            <CardDescription className="text-xs uppercase tracking-[0.35em] text-muted-foreground">
-              Sage Garden Theme
-            </CardDescription>
-            <CardTitle className="text-3xl">你好，{greetingName}</CardTitle>
-            <p className="text-muted-foreground">
-              右侧主内容区也启用了 Sage Garden 主题色，卡片、表格与按钮都沿用新的 OKLCH 调色板。
-            </p>
-            <div className="flex flex-wrap gap-3 pt-1">
-              <Button onClick={handleRefresh} disabled={loading || refreshing}>
-                {refreshing ? '刷新中...' : '刷新列表'}
-              </Button>
-              <Button variant="secondary" onClick={handleLogout}>
-                退出登录
-              </Button>
-              <Link href="/" className={cn(buttonVariants({ variant: 'ghost' }))}>
-                查看前台
-              </Link>
-            </div>
-          </CardHeader>
-        </Card>
-        {DashboardCards}
-        <div className="grid gap-6 lg:grid-cols-3">
-          {filesTable}
-          {quickActions}
+        <div className="flex flex-col gap-2">
+          <p className="text-sm text-muted-foreground">您好 {greetingName}，欢迎管理项目</p>
+          <h1 className="text-3xl font-semibold tracking-tight">项目管理</h1>
+          <p className="text-muted-foreground">
+            管理 content/projects 目录中的文件，支持草稿/已发布过滤与搜索。
+          </p>
         </div>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardDescription>项目总数</CardDescription>
+              <CardTitle className="text-2xl">{files.length}</CardTitle>
+            </CardHeader>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardDescription>已发布</CardDescription>
+              <CardTitle className="text-2xl text-emerald-500 dark:text-emerald-400">
+                {Math.max(files.length - files.filter((file) => /draft/i.test(file.name)).length, 0)}
+              </CardTitle>
+            </CardHeader>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardDescription>草稿</CardDescription>
+              <CardTitle className="text-2xl text-amber-500">
+                {files.filter((file) => /draft/i.test(file.name)).length}
+              </CardTitle>
+            </CardHeader>
+          </Card>
+        </div>
+        {filesTable}
       </div>
     </AdminLayout>
   )
