@@ -10,6 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { cn } from '@/lib/utils'
+import { FileText, LayoutGrid, NotebookPen, ShieldCheck, Sparkles } from 'lucide-react'
 
 interface RepoFile {
   name: string
@@ -106,46 +107,53 @@ export default function AdminPage() {
 
   const DashboardCards = (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">文章总数</CardTitle>
-          <span className="text-xs uppercase text-muted-foreground">总览</span>
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{files.length}</div>
-          <p className="text-xs text-muted-foreground">统计 content/posts 中的 MDX 文件</p>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">已发布</CardTitle>
-          <span className="text-xs uppercase text-muted-foreground">PUBLISHED</span>
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold text-emerald-500 dark:text-emerald-400">{published}</div>
-          <p className="text-xs text-muted-foreground">匹配非 draft 的文件</p>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">草稿</CardTitle>
-          <span className="text-xs uppercase text-muted-foreground">Draft</span>
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold text-amber-500">{drafts}</div>
-          <p className="text-xs text-muted-foreground">文件名包含 draft 的文章</p>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">存储目录</CardTitle>
-          <span className="text-xs uppercase text-muted-foreground">PATH</span>
-        </CardHeader>
-        <CardContent>
-          <div className="text-lg font-semibold">content/posts</div>
-          <p className="text-xs text-muted-foreground">通过 GitHub API 实时同步</p>
-        </CardContent>
-      </Card>
+      {[
+        {
+          title: '文章总数',
+          value: files.length,
+          desc: '统计 content/posts 中的 MDX',
+          icon: <FileText className="h-5 w-5" />,
+        },
+        {
+          title: '已发布',
+          value: published,
+          desc: '非 draft 的文章',
+          className: 'text-emerald-500 dark:text-emerald-400',
+          icon: <ShieldCheck className="h-5 w-5" />,
+        },
+        {
+          title: '草稿',
+          value: drafts,
+          desc: '文件名包含 draft',
+          className: 'text-amber-500',
+          icon: <NotebookPen className="h-5 w-5" />,
+        },
+        {
+          title: '存储目录',
+          value: 'content/posts',
+          desc: 'GitHub 同步路径',
+          icon: <LayoutGrid className="h-5 w-5" />,
+        },
+      ].map((item) => (
+        <Card
+          key={item.title}
+          className="border-[var(--sidebar-border)] bg-[var(--sidebar)]/20 shadow-sm"
+        >
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <div className="flex items-center gap-3">
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--sidebar)]/60 text-[var(--sidebar-foreground)]">
+                {item.icon}
+              </span>
+              <CardTitle className="text-sm font-medium">{item.title}</CardTitle>
+            </div>
+            <Sparkles className="h-4 w-4 text-[var(--sidebar-foreground)]/60" />
+          </CardHeader>
+          <CardContent>
+            <div className={cn('text-2xl font-bold', item.className)}>{item.value}</div>
+            <p className="text-xs text-muted-foreground">{item.desc}</p>
+          </CardContent>
+        </Card>
+      ))}
     </div>
   )
 
@@ -240,7 +248,7 @@ export default function AdminPage() {
     <Card className="lg:col-span-2 border-[var(--sidebar-border)] bg-[var(--sidebar)]/20">
       <CardHeader>
         <CardTitle>快捷操作</CardTitle>
-        <CardDescription>模仿 Acme Inc demo 的操作块，快速执行常见动作。</CardDescription>
+        <CardDescription>常用入口在这里，保持与 Sage Garden 主色一致。</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="flex flex-wrap gap-3">
@@ -250,6 +258,12 @@ export default function AdminPage() {
           <Button variant="secondary" onClick={handleLogout}>
             退出登录
           </Button>
+          <Link href="/admin/posts" className={cn(buttonVariants({ variant: 'outline' }))}>
+            打开文章列表
+          </Link>
+          <Link href="/admin/projects" className={cn(buttonVariants({ variant: 'outline' }))}>
+            打开项目列表
+          </Link>
           <Link href="/" className={cn(buttonVariants({ variant: 'ghost' }))}>
             查看前台
           </Link>
