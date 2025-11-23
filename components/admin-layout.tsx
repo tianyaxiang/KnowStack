@@ -150,7 +150,7 @@ export function AdminLayout({ children, className, onLogout }: AdminLayoutProps)
                     <PanelLeftClose className="h-5 w-5" />
                   )}
                   <span className="sr-only">
-                    {sidebarCollapsed ? '展开侧边栏' : '折叠侧边栏'}
+                    {sidebarCollapsed ?  '展开侧边栏' : '折叠侧边栏'}
                   </span>
                 </Button>
                 <SheetTrigger asChild>
