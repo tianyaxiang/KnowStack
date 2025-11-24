@@ -181,8 +181,7 @@ export function AdminLayout({ children, className, onLogout }: AdminLayoutProps)
                       variant="outline"
                       className="w-full justify-start gap-2"
                       onClick={handleLogout}
-                      disabled={!onLogout}
-                    >
+                      disabled={!onLogout} >
                       <LogOut className="h-4 w-4" />
                       退出登录
                     </Button>
